@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hinata Bot | Elite Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Premium Animated Background -->
+    <div class="background-blobs">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Glass Navbar -->
+    <nav class="glass-navbar">
+      <a href="#" class="nav-logo">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        HINATA <span class="v-tag">v3.0 PRO</span>
+      </a>
+      <div class="nav-status">
+        <div class="status-dot" id="bot-status-dot"></div>
+        <span id="bot-status-text">Connecting...</span>
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+      <!-- Statistics Overview -->
+      <div class="stats-grid">
+        <div class="glass-card stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-info">
+            <h3>Total Users</h3>
+            <p id="stat-users">0</p>
+          </div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-house-chimney"></i></div>
+          <div class="stat-info">
+            <h3>Total Groups</h3>
+            <p id="stat-groups">0</p>
+          </div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-icon">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div class="stat-info">
+            <h3>System Uptime</h3>
+            <p id="stat-uptime">00:00:00</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Operational Grid -->
+      <div class="control-grid">
+        <!-- System Controls -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-sliders"></i> Master Controls</h2>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="controlBot('restart')">
+              <i class="fa-solid fa-power-off"></i> Restart Bot
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="controlBot('toggle_bot')"
+            >
+              <i class="fa-solid fa-circle-pause"></i> Toggle Status
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="controlBot('clear_logs')"
+            >
+              <i class="fa-solid fa-broom"></i> Wipe Logs
+            </button>
+            <button
+              class="btn btn-danger"
+              onclick="controlBot('toggle_access')"
+            >
+              <i class="fa-solid fa-shield-halved"></i> Global Access
+            </button>
+            <button class="btn btn-secondary" onclick="trackUsers()">
+              <i class="fa-solid fa-fingerprint"></i> Deep Track
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="window.location.href = '/api/download_db'"
+            >
+              <i class="fa-solid fa-download"></i> Download DB
+            </button>
+          </div>
+
+          <div
+            class="card-header"
+            style="margin-top: 2.5rem; margin-bottom: 1rem"
+          >
+            <h2><i class="fa-solid fa-key"></i> Bot Authentication</h2>
+          </div>
+          <div class="form-group">
+            <label>Encrypted Token (Active)</label>
+            <div
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 12px;
+                border-radius: 12px;
+                font-family: monospace;
+                color: var(--text-muted);
+                margin-bottom: 15px;
+              "
+              id="masked-token-view"
+            >
+              ••••••••••••••••••••••••••••••••
+            </div>
+            <label>Update Token</label>
+            <div class="input-wrapper" style="display: flex; gap: 10px">
+              <input
+                type="password"
+                id="bot-token-input"
+                placeholder="Paste new bot token here..."
+              />
+              <button
+                class="btn btn-primary"
+                onclick="updateBotToken()"
+                style="padding: 10px 20px"
+              >
+                Update
+              </button>
+            </div>
+            <small
+              style="color: var(--text-muted); margin-top: 8px; display: block"
+              >Updating token requires a bot restart to apply changes.</small
+            >
+          </div>
+
+          <div
+            class="card-header"
+            style="margin-top: 2rem; margin-bottom: 1rem"
+          >
+            <h2><i class="fa-solid fa-image"></i> Asset Matrix</h2>
+          </div>
+          <div class="form-group">
+            <label>Primary Welcome Image (URL)</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="welcome-img-input"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Fallback Assets (URL)</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="fallback-img-input"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="updateAssets()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Sync Assets
+          </button>
+        </div>
+
+        <!-- Admin Operations -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-gavel"></i> Admin Operations</h2>
+          </div>
+          <div class="form-group">
+            <label>Target User ID</label>
+            <input
+              type="text"
+              id="admin-user-id"
+              placeholder="Enter User ID..."
+              class="input-wrapper"
+              style="
+                width: 100%;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border);
+                color: var(--text-muted);
+                border-radius: 8px;
+              "
+            />
+          </div>
+          <div class="form-group" style="margin-top: 10px">
+            <label>Target Group ID (Optional for global actions)</label>
+            <input
+              type="text"
+              id="admin-group-id"
+              placeholder="Enter Group ID..."
+              class="input-wrapper"
+              style="
+                width: 100%;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border);
+                color: var(--text-muted);
+                border-radius: 8px;
+              "
+            />
+          </div>
+          <div class="btn-group" style="margin-top: 15px">
+            <button class="btn btn-danger" onclick="executeAdmin('ban')">
+              <i class="fa-solid fa-ban"></i> Ban
+            </button>
+            <button class="btn btn-secondary" onclick="executeAdmin('unban')">
+              <i class="fa-solid fa-check"></i> Unban
+            </button>
+            <button class="btn btn-danger" onclick="executeAdmin('kick')">
+              <i class="fa-solid fa-shoe-prints"></i> Kick
+            </button>
+            <button class="btn btn-secondary" onclick="executeAdmin('mute')">
+              <i class="fa-solid fa-microphone-slash"></i> Mute
+            </button>
+            <button class="btn btn-secondary" onclick="executeAdmin('unmute')">
+              <i class="fa-solid fa-microphone"></i> Unmute
+            </button>
+            <button class="btn btn-primary" onclick="executeAdmin('addadmin')">
+              <i class="fa-solid fa-user-shield"></i> Make Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Broadcast Center -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-paper-plane"></i> Broadcast Engine</h2>
+          </div>
+          <div class="form-group">
+            <label>Campaign Content</label>
+            <textarea
+              id="broadcast-msg"
+              placeholder="Draft your global message... High priority notifications only."
+            ></textarea>
+          </div>
+          <div class="form-group" style="margin-top: 10px">
+            <label>Specific Target ID (Optional)</label>
+            <input
+              type="text"
+              id="broadcast-target-id"
+              style="
+                width: 100%;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border);
+                color: var(--text-muted);
+                border-radius: 8px;
+              "
+              placeholder="Leave empty for 'All', 'Users', or 'Groups'. Or enter User/Group ID here..."
+            />
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="sendBroadcast('all')">
+              <i class="fa-solid fa-globe"></i> Send to All
+            </button>
+            <button class="btn btn-secondary" onclick="sendBroadcast('users')">
+              <i class="fa-solid fa-user"></i> Users Only
+            </button>
+            <button class="btn btn-secondary" onclick="sendBroadcast('groups')">
+              <i class="fa-solid fa-users-viewfinder"></i> Groups Only
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="sendBroadcast('specific')"
+            >
+              <i class="fa-solid fa-bullseye"></i> Specific Target
+            </button>
+          </div>
+        </div>
+
+        <!-- System Terminal -->
+        <div class="glass-card" style="grid-column: 1 / -1">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-terminal"></i> Neural Logs (Live)</h2>
+            <span class="v-tag" style="background: var(--secondary)"
+              >REAL-TIME</span
+            >
+          </div>
+          <div class="logs-container" id="logs-container">
+            <div class="log-entry system">
+              Awaiting logs from neural engine...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Insights -->
+      <h2 class="section-title">
+        <i class="fa-solid fa-chart-pie"></i> Database Insights
+      </h2>
+      <div class="control-grid">
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-bolt"></i> Recent Activations</h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>User</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h2><i class="fa-solid fa-link"></i> Linked Groups</h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Linked</th>
+                </tr>
+              </thead>
+              <tbody id="groups-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Master Command Deck -->
+      <div class="glass-card" style="margin-bottom: 4rem">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-book-sparkles"></i> Master Command Deck</h2>
+        </div>
+        <div class="commands-container">
+          <div class="command-box">
+            <div class="cmd-group-title">
+              <i class="fa-solid fa-brain"></i> Neural Systems
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/gemini</span>
+              <span class="cmd-desc">Google Gemini 3.0 Integration</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/chatgpt</span>
+              <span class="cmd-desc">Advanced GPT-5 Reasoning</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/mistral</span>
+              <span class="cmd-desc">Mistral 3.1 Neural Interface</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/zerotwo</span>
+              <span class="cmd-desc">Uncensored Romance AI Companion</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/imagine</span>
+              <span class="cmd-desc">Flux-Based Image Generation</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/detector</span>
+              <span class="cmd-desc">AI Content Verification Tool</span>
+            </div>
+          </div>
+
+          <div class="command-box">
+            <div class="cmd-group-title">
+              <i class="fa-solid fa-screwdriver-wrench"></i> Utility Matrix
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/dl</span>
+              <span class="cmd-desc">Universal Multi-Platform Downloader</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/webss</span>
+              <span class="cmd-desc">High-Res Website Captures</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/tempmail</span>
+              <span class="cmd-desc">Ephemeral Email Box Generation</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/email</span>
+              <span class="cmd-desc">Anonymous SMTP Relaying</span>
+            </div>
+          </div>
+
+          <div class="command-box">
+            <div class="cmd-group-title">
+              <i class="fa-solid fa-fire"></i> Specialized Core
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/ff</span>
+              <span class="cmd-desc">Player Meta-Data Scraper</span>
+            </div>
+            <div class="cmd-item">
+              <span class="cmd-name">/visit</span>
+              <span class="cmd-desc">FF Account Visit System</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Records Section -->
+      <div class="glass-card table-card">
+        <div class="card-header">
+          <h2>
+            <i class="fa-solid fa-database"></i> Global Intelligence Registry
+          </h2>
+        </div>
+        <div class="table-controls">
+          <input
+            type="text"
+            id="user-search"
+            class="search-input"
+            placeholder="Resolve ID or Identity..."
+            onkeyup="filterUsers()"
+          />
+          <button class="btn btn-secondary" onclick="refreshData()">
+            <i class="fa-solid fa-rotate"></i> Sync Data
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table id="master-users-table">
+            <thead>
+              <tr>
+                <th>Identity ID</th>
+                <th>Neural Name</th>
+                <th>Handle</th>
+                <th>Registration</th>
+              </tr>
+            </thead>
+            <tbody id="master-users-body">
+              <tr>
+                <td colspan="4">Synchronizing with registry...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Global Groups Registry -->
+      <div class="glass-card table-card" style="margin-top: 3rem">
+        <div class="card-header">
+          <h2>
+            <i class="fa-solid fa-users-viewfinder"></i> Global Groups Registry
+          </h2>
+        </div>
+        <div class="table-controls">
+          <input
+            type="text"
+            id="group-search"
+            class="search-input"
+            placeholder="Search Group ID or Title..."
+            onkeyup="filterGroups()"
+          />
+        </div>
+        <div class="table-wrapper">
+          <table id="master-groups-table">
+            <thead>
+              <tr>
+                <th>Group ID</th>
+                <th>Group Title</th>
+                <th>Type</th>
+                <th>Integration Date</th>
+              </tr>
+            </thead>
+            <tbody id="master-groups-body">
+              <tr>
+                <td colspan="4">Synchronizing with registry...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Transmission History -->
+      <div class="glass-card table-card" style="margin-top: 3rem">
+        <div class="card-header">
+          <h2>
+            <i class="fa-solid fa-clock-rotate-left"></i> Transmission History
+          </h2>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Snippet</th>
+                <th>Sector</th>
+                <th>State</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="broadcasts-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- File Registry (Downloads) -->
+      <div class="glass-card table-card" style="margin-top: 3rem">
+        <div class="card-header">
+          <h2>
+            <i class="fa-solid fa-folder-open"></i> Neural Storage Registry
+          </h2>
+          <button
+            class="btn btn-secondary"
+            onclick="controlBot('clear_downloads')"
+          >
+            <i class="fa-solid fa-broom"></i> Clear Registry
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>File Name</th>
+                <th>Magnitude (Size)</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="files-body">
+              <tr>
+                <td colspan="3">Scanning storage segments...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Blacklist Matrix -->
+      <div class="glass-card table-card" style="margin-top: 3rem">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-user-slash"></i> Blacklist Matrix</h2>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody id="banned-users-body">
+              <tr>
+                <td colspan="2">No active bans in neural network.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer>
+        <p>&copy; 2026 Hinata Neural Systems. Managed by @ShawonXnone.</p>
+      </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>
